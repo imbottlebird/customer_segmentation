@@ -1,156 +1,129 @@
-library(RColorBrewer)
-library(ggplot2)
-library(flexclust)
+################
+## Clustering ##
+################
+
 library(caret)
-library(cluster) 
-library(dplyr)
 
-##### Airline Data
+### PART 1 : exploring and scaling the data
 
-### Importation of data and normalization
+# after setting the current directory, loading the airline data 
+airline <- read.csv("data/airline.csv")
+str(airline)
 
-# Data import
-airline <- read.csv("AirlinesCluster.csv")
+airline
+# Balance: Number of miles eligible for award travel
+# BonusTrans: Number of non-flight bonus transactions in the past 12 months
+# BonusMiles: Number of miles earned from those transactions
+# FlightTrans: Number of flight transactions
+# FlightMiles: Number of miles earned from those transactions
+# DaysSinceEnroll: Tenure in the program (days)
 
-# Data display
-head(airline, 16)
-tail(airline, 5)
-colMeans(airline)
-apply(airline, 2, sd)
+# We need to preprocess the data so that we treat each column equally to compute the clusters
+# we use the preProcess function from Caret that does all the work for us
 
-# Normalization
-pp <- preProcess(airline, method=c("center", "scale"))
+# preprocessing steps:
+# First, *center* the data (substract the mean to each column)
+# => mean becomes 0 for each column
+# Then, *scale* the data, by dividing by the standard deviation
+# => std becomes 1 for each column
+
+#step 1: create the pre-processor using preProcess
+pp <- preProcess(airline, method=c("center", "scale"))   # normalization for each col: (X_i-mean)/std
+class(pp)
+pp
+pp$mean
+
+#step 2: apply it to our dataset
 airline.scaled <- predict(pp, airline)
 
-# Display of nromalized data
-head(round(airline.scaled, 2), 16)
-tail(round(airline.scaled, 2), 5)
+# Sanity check
+colMeans(airline)
+colMeans(airline.scaled)# mean is (approximately) 0 for all columns
+apply(airline.scaled,2,sd)# standard deviation is 1 for all columns (apply() applies function given as third argument to matrix given as first argument. 2 means apply sd() to cols. 1 would apply it row-wise, col(1,2) both to row and column.)
 
-### k-means
+head(airline.scaled)
+# What does a negative value represent?
 
-## k-means with k=8
+### PART 2 : Clustering: K-Means
 
+# k-means has a random start (where the centroids are initially randomly located)
+# we need to set the seed to have the same result
 set.seed(144)
-# Running the k means algorithm
-mod <- kmeans(airline.scaled, iter.max=100, 8)
-cluster.assignment.kmeans <- mod$cluster
 
-# Summary of results
-t(round(mod$centers, 2))
-round(t(mod$centers) * pp$std + pp$mean)
-table(mod$cluster)
+# The kmeans function creates the clusters
+# we can set an upper bound to the number of iterations
+# of the algorithm 
+# here we set k=8
+km <- kmeans(airline.scaled, centers = 8, iter.max=100) # centers randomly selected from rows of airline.scaled
 
-## Scree plot: k means for all values of k
+class(km) # class: kmeans
+names(km)
 
-# Running the k means algorithm for each k
-dat <- data.frame(k = 1:100)
-dat$SS <- sapply(dat$k, function(k) {
-  set.seed(144)
+# cluster centroids. Store this result
+km.centroids <- km$centers
+km.centroids
+# cluster for each point. Store this result.
+km.clusters <- km$cluster
+km.clusters
+# the sum of the squared distances of each observation from its cluster centroid.
+# we use it the measure cluster dissimilarity
+km$tot.withinss  # cluster dissimilarity
+# the number of observations in each cluster -- table(km$cluster) also works. Store this resul
+km.size <- km$size
+km.size
+
+# Scree plot for k-means
+# For k means, we literally try many value of k and look at their dissimilarity.
+# here we test all k from 1 to 100
+k.data <- data.frame(k = 1:100)
+k.data$SS <- sapply(k.data$k, function(k) {
   kmeans(airline.scaled, iter.max=100, k)$tot.withinss
 })
 
-# Plotting the results
-print(ggplot(dat, aes(x=k, y=SS)) +
-        geom_line(lwd=2) +
-        theme_bw() +
-        xlab("Number of Clusters (k)") +
-        ylab("Within-Cluster Sum of Squares") +
-        ylim(0, 25000) +
-        theme(axis.title=element_text(size=18), axis.text=element_text(size=18)))
+# Plot the scree plot.
+plot(k.data$k, k.data$SS, type="l")
 
 
-### Hierarchical clustering
+### PART 3 : Hierarchical Clustering
+# Compute all-pair euclidian distances between our observations
+d <- dist(airline.scaled)    # method = "euclidean"
+class(d)
 
-## Running the hierarchical clustering algorithm
+# Creates the Hierarchical clustering
+hclust.mod <- hclust(d, method="ward.D2")
+# The "method=ward.D2" indicates the criterion to select the pair of clusters to be merged at each iteration
 
-d <- dist(airline.scaled)
-mod.hclust <- hclust(d, method="ward.D2")
+# Now, we can plot the hierarchy structure (dendrogram)
+# labels=F (false) because we do not want to print text
+# for each of the 3999 observations
+plot(hclust.mod, labels=F, ylab="Dissimilarity", xlab = "", sub = "")
 
-## Dendrogram
-
-
-dissimilarity.all <- c(75,50,32,25,20,15)
-
-plot(mod.hclust, labels=F, xlab=NA, ylab="Dissimilarity", sub=NA, main=NA)
-
-
-plot(mod.hclust, labels=F, xlab=NA, ylab="Dissimilarity", sub=NA, main=NA)
-
-
-## Scree plot
-
-# Varying the number of clusters
-dat.hc.airline <- data.frame(nclust = seq_along(mod.hclust$height),
-                             dissimilarity = rev(mod.hclust$height))
-
-# Plotting the results
-print(ggplot(dat.hc.airline, aes(x=nclust, y=dissimilarity)) +
-        geom_line(lwd=2) +
-        theme_bw() +
-        xlab("Number of Clusters") +
-        ylab("Dissimilarity") +
-        xlim(0, 100) +
-        theme(axis.title=element_text(size=18), axis.text=element_text(size=18)))
-
-
-## Analyze hirearchical clustering results with 7 clusters
-
-# Assignment of data points to clusters
-assignments <- cutree(mod.hclust, 7)
-
-# Display clusters
-round(sapply(split(airline.scaled, assignments), colMeans), 2)
-table(assignments)
-
-##### Automobile data
-
-### Importation of data and normalization
-
-# Data import
-data(auto)
-
-# Data wrangling
-auto.cutdown <- auto[,c("ch_driving_properties", "ch_interior", "ch_technology", "ch_comfort", "ch_reliability",
-                        "ch_handling", "ch_power", "ch_consumption", "ch_sporty", "ch_safety")]
-for (k in names(auto.cutdown)) {
-  auto.cutdown[,k] <- as.numeric(auto.cutdown[,k])
-}
-names(auto.cutdown) <- substr(names(auto.cutdown), 4, nchar(names(auto.cutdown)))
-
-# Display
-head(auto.cutdown, 16)
-tail(auto.cutdown, 5)
-
-### Hierarchical clustering
-
-# Running the hierarchical clustering algorithm
-d <- dist(auto.cutdown)
-mod.hclust <- hclust(d, method="ward.D2")
-
-# Plotting the dendogram
-
-plot(mod.hclust, labels=F, xlab=NA, ylab="Dissimilarity", sub=NA, main=NA)
-
-plot(mod.hclust, labels=F, xlab=NA, ylab="Dissimilarity", sub=NA, main=NA)
-
-
-# Computing the scree plot
-dat.hc.auto <- data.frame(nclust = seq_along(mod.hclust$height),
-                          dissimilarity = rev(mod.hclust$height))
+# To select a "good" k value, pick something that defines the corner / pivot in the L (knee)
+# the next line puts this data in the right form to be plotted
+hc.dissim <- data.frame(k = seq_along(hclust.mod$height),   # index: 1,2,...,length(hclust.mod$height)
+                        dissimilarity = rev(hclust.mod$height)) # reverse elements
+head(hc.dissim)
 
 # Scree plot
+plot(hc.dissim$k, hc.dissim$dissimilarity, type="l")
+# Let's zoom on the smallest k values:
+plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
+axis(side = 1, at = 1:10)
+# what would be a "good" k value ? Pick something that defines the corner / pivot in the L.
 
-print(ggplot(dat.hc.auto, aes(x=nclust, y=dissimilarity)) +
-        geom_line(lwd=2) +
-        theme_bw() +
-        xlab("Number of Clusters") +
-        ylab("Dissimilarity") +
-        xlim(0, 100) +
-        theme(axis.title=element_text(size=18), axis.text=element_text(size=18)))
+# Improvement in dissimilarity for increasing number of clusters
+hc.dissim.dif = head(hc.dissim,-1)-tail(hc.dissim,-1)
+head(hc.dissim.dif,10)
 
-# Assignment of data points to clusters
-assignments <- cutree(mod.hclust, 7)
+# now that we have k (we chose k=7 in the lecture), we can construct the clusters
+h.clusters <- cutree(hclust.mod, 7)
+h.clusters
 
-# Display clusters
-round(sapply(split(auto.cutdown, assignments), colMeans), 2)
-table(assignments)
+# The *centroid* for a cluster is the mean value of all points in the cluster: 
+aggregate(airline.scaled, by=list(h.clusters), mean) # Compute centroids
+
+# *size* of each cluster
+table(h.clusters)
+
+# many zeros mean clusters from kmeans and hierarchical "match up"
+table(h.clusters, km.clusters)

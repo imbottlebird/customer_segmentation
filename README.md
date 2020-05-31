@@ -42,7 +42,7 @@ colMeans(airline.scaled)
 apply(airline.scaled,2,sd)
 ```
 
-|**Raw**|
+|**Original**|
 |:--|
 |<img src='img/al_data.png' width='400'>|
 
@@ -53,7 +53,7 @@ apply(airline.scaled,2,sd)
 
 ## 2. K-Means clustering
 
-K-means has a random start (where the centroids are initially randomly located).
+K-means has a random start where the centroids are initially randomly located.
 
 ```bash
 # The kmeans function creates the clusters
@@ -139,7 +139,7 @@ plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
 axis(side = 1, at = 1:10)
 ```
 
-<img src='img/hc_scree.png' width='450' align='middle'>
+<img src='img/hc_scree_enl.png' width='450' align='middle'>
 
 As discussed above, k=7 seems to be a good pick.
 

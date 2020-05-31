@@ -12,7 +12,7 @@ There are six numerical values describing customers as follow:
 - **DaysSinceEnroll**: Tenure in the program (days)
 
 <p align='center'>
-<img src='img/data_str.png/' align='middle' width='300'>
+<img src='img/data_str.png/' align='middle' width='450'>
 </p>
 
 ### Preprocess data
@@ -39,7 +39,7 @@ apply(airline.scaled,2,sd)
 
 |**Raw**|**Scaled**|
 |--|--|
-|<img src='img/al_data.png' width='200'>|<img src='img/al_data_scaled.png' width='200'>|
+|<img src='img/al_data.png' width='350'>|<img src='img/al_data_scaled.png' width='350'>|
 <br/>
 
 ## Clustering: K-Means
@@ -80,7 +80,7 @@ k.data$SS <- sapply(k.data$k, function(k) {
 # Plot the scree plot.
 plot(k.data$k, k.data$SS, type="l")
 ```
-<img src='img/km_scree.png' width='250' align='middle'>
+<img src='img/km_scree.png' width='350' align='middle'>
 
 <br />
 
@@ -100,7 +100,7 @@ hclust.mod <- hclust(d, method="ward.D2")
 # for each of the 3999 observations
 plot(hclust.mod, labels=F, ylab="Dissimilarity", xlab = "", sub = "")
 ```
-<img src='img/hc_dendrogram.png' width='300' align='middle'>
+<img src='img/hc_dendrogram.png' width='400' align='middle'>
 
 ### Scree Plot
 Create the scree plot: dissimilarity for each k
@@ -117,7 +117,7 @@ plot(hc.dissim$k, hc.dissim$dissimilarity, type="l")
 plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
 axis(side = 1, at = 1:10)
 ```
-<img src='img/hc_scree.png' width='250' align='middle'>
+<img src='img/hc_scree.png' width='350' align='middle'>
 
 To select a "good" k value, pick something that defines the corner / pivot in the L (knee).
 ```bash

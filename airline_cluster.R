@@ -39,8 +39,9 @@ airline.scaled <- predict(pp, airline)
 # Sanity check
 colMeans(airline)
 colMeans(airline.scaled)# mean is (approximately) 0 for all columns
-apply(airline.scaled,2,sd)# standard deviation is 1 for all columns (apply() applies function given as third argument to matrix given as first argument. 2 means apply sd() to cols. 1 would apply it row-wise, col(1,2) both to row and column.)
-
+apply(airline.scaled,2,sd)# standard deviation is 1 for all columns 
+# (apply() applies function given as third argument to matrix given as first argument. 
+# 2 means apply sd() to cols. 1 would apply it row-wise, col(1,2) both to row and column.)
 head(airline.scaled)
 # What does a negative value represent?
 
@@ -52,8 +53,7 @@ set.seed(144)
 
 # The kmeans function creates the clusters
 # we can set an upper bound to the number of iterations
-# of the algorithm 
-# here we set k=8
+# of the algorithm. here we set k=8
 km <- kmeans(airline.scaled, centers = 8, iter.max=100) # centers randomly selected from rows of airline.scaled
 
 class(km) # class: kmeans
@@ -67,10 +67,10 @@ km.clusters <- km$cluster
 km.clusters
 # the sum of the squared distances of each observation from its cluster centroid.
 # we use it the measure cluster dissimilarity
-km$tot.withinss  # cluster dissimilarity
+km$tot.withinss  # cluster dissimilarity: 8289.099
 # the number of observations in each cluster -- table(km$cluster) also works. Store this resul
 km.size <- km$size
-km.size
+km.size # 893 1124  504  212 1107   69   76   14
 
 # Scree plot for k-means
 # For k means, we literally try many value of k and look at their dissimilarity.
@@ -123,7 +123,7 @@ h.clusters
 aggregate(airline.scaled, by=list(h.clusters), mean) # Compute centroids
 
 # *size* of each cluster
-table(h.clusters)
+table(h.clusters) # 1242  833  746  723  271   63  121
 
 # many zeros mean clusters from kmeans and hierarchical "match up"
 table(h.clusters, km.clusters)

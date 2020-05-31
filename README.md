@@ -4,14 +4,16 @@
 Data on 3,999 customers obtained from the loyalty program of a former airline.
 
 There are six numerical values describing customers as follow:
-- Balance: Number of miles eligible for award travel
-- BonusTrans: Number of non-flight bonus transactions in the past 12 months
-- BonusMiles: Number of miles earned from those transactions
-- FlightTrans: Number of flight transactions
-- FlightMiles: Number of miles earned from those transactions
-- DaysSinceEnroll: Tenure in the program (days)
+- **Balance**: Number of miles eligible for award travel
+- **BonusTrans**: Number of non-flight bonus transactions in the past 12 months
+- **BonusMiles**: Number of miles earned from those transactions
+- **FlightTrans**: Number of flight transactions
+- **FlightMiles**: Number of miles earned from those transactions
+- **DaysSinceEnroll**: Tenure in the program (days)
 
-![alt](img/data_str.png)
+<p align='center'>
+<img src='img/data_str.png/' align='middle' width='300'>
+</p>
 
 ### Preprocess data
 - First, 'center' the data by substracting the mean to each column (mean becomes 0 for each column)
@@ -34,12 +36,15 @@ colMeans(airline)
 colMeans(airline.scaled)
 apply(airline.scaled,2,sd)
 ```
+
+|**Raw**|**Scaled**|
+|--|--|
+|<img src='img/al_data.png' width='200'>|<img src='img/al_data_scaled.png' width='200'>|
 <br/>
 
 ## Clustering: K-Means
 
-k-means has a random start (where the centroids are initially randomly located). we need to set the seed to have the same result
-set.seed(144)
+k-means has a random start (where the centroids are initially randomly located).
 
 ```bash
 # The kmeans function creates the clusters
@@ -61,7 +66,6 @@ km$tot.withinss  # cluster dissimilarity
 km.size <- km$size
 km.size
 ```
-<br/>
 
 ### Scree plot for k-means
 
@@ -76,7 +80,9 @@ k.data$SS <- sapply(k.data$k, function(k) {
 # Plot the scree plot.
 plot(k.data$k, k.data$SS, type="l")
 ```
+<img src='img/km_scree.png' width='250' align='middle'>
 
+<br />
 
 ## Hierarchical Clustering
 Compute all-pair euclidian distances between our observations
@@ -94,10 +100,10 @@ hclust.mod <- hclust(d, method="ward.D2")
 # for each of the 3999 observations
 plot(hclust.mod, labels=F, ylab="Dissimilarity", xlab = "", sub = "")
 ```
-<br/>
+<img src='img/hc_dendrogram.png' width='300' align='middle'>
 
 ### Scree Plot
-To choose a good value for k, create the scree plot: dissimilarity for each k
+Create the scree plot: dissimilarity for each k
 
 ```bash
 hc.dissim <- data.frame(k = seq_along(hclust.mod$height),   # index: 1,2,...,length(hclust.mod$height)
@@ -111,7 +117,7 @@ plot(hc.dissim$k, hc.dissim$dissimilarity, type="l")
 plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
 axis(side = 1, at = 1:10)
 ```
-
+<img src='img/hc_scree.png' width='250' align='middle'>
 
 To select a "good" k value, pick something that defines the corner / pivot in the L (knee).
 ```bash

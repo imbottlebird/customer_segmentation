@@ -18,8 +18,7 @@ airline
 # FlightMiles: Number of miles earned from those transactions
 # DaysSinceEnroll: Tenure in the program (days)
 
-# We need to preprocess the data so that we treat each column equally to compute the clusters
-# we use the preProcess function from Caret that does all the work for us
+# Need to preprocess the data to treat each column equally to compute the clusters
 
 # preprocessing steps:
 # First, *center* the data (substract the mean to each column)
@@ -33,7 +32,7 @@ class(pp)
 pp
 pp$mean
 
-#step 2: apply it to our dataset
+#step 2: apply it to the dataset
 airline.scaled <- predict(pp, airline)
 
 # Sanity check
@@ -48,13 +47,13 @@ head(airline.scaled)
 ### PART 2 : Clustering: K-Means
 
 # k-means has a random start (where the centroids are initially randomly located)
-# we need to set the seed to have the same result
+# set the seed to have the same result
 set.seed(144)
 
 # The kmeans function creates the clusters
-# we can set an upper bound to the number of iterations
-# of the algorithm. here we set k=8
-km <- kmeans(airline.scaled, centers = 8, iter.max=100) # centers randomly selected from rows of airline.scaled
+# set the number of iterations to k=8
+km <- kmeans(airline.scaled, centers = 8, iter.max=100) 
+# centers randomly selected from rows of airline.scaled
 
 class(km) # class: kmeans
 names(km)
@@ -65,10 +64,10 @@ km.centroids
 # cluster for each point. Store this result.
 km.clusters <- km$cluster
 km.clusters
-# the sum of the squared distances of each observation from its cluster centroid.
-# we use it the measure cluster dissimilarity
+# the sum of the squared distances of each observation from its cluster centroid => cluster dissimilarity
 km$tot.withinss  # cluster dissimilarity: 8289.099
-# the number of observations in each cluster -- table(km$cluster) also works. Store this resul
+
+# the number of observations in each cluster
 km.size <- km$size
 km.size # 893 1124  504  212 1107   69   76   14
 
@@ -82,10 +81,12 @@ k.data$SS <- sapply(k.data$k, function(k) {
 
 # Plot the scree plot.
 plot(k.data$k, k.data$SS, type="l")
+plot(k.data$k, k.data$SS, type="l", xlim=c(0,40))
+axis(side = 1, at = 1:10)
 
 
 ### PART 3 : Hierarchical Clustering
-# Compute all-pair euclidian distances between our observations
+# Compute all-pair euclidian distances between the observations
 d <- dist(airline.scaled)    # method = "euclidean"
 class(d)
 
@@ -93,9 +94,8 @@ class(d)
 hclust.mod <- hclust(d, method="ward.D2")
 # The "method=ward.D2" indicates the criterion to select the pair of clusters to be merged at each iteration
 
-# Now, we can plot the hierarchy structure (dendrogram)
-# labels=F (false) because we do not want to print text
-# for each of the 3999 observations
+# Now, plot the hierarchy structure (dendrogram)
+# labels=F (false) not to print text for each of the 3999 observations
 plot(hclust.mod, labels=F, ylab="Dissimilarity", xlab = "", sub = "")
 
 # To select a "good" k value, pick something that defines the corner / pivot in the L (knee)
@@ -109,13 +109,12 @@ plot(hc.dissim$k, hc.dissim$dissimilarity, type="l")
 # Let's zoom on the smallest k values:
 plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
 axis(side = 1, at = 1:10)
-# what would be a "good" k value ? Pick something that defines the corner / pivot in the L.
 
 # Improvement in dissimilarity for increasing number of clusters
 hc.dissim.dif = head(hc.dissim,-1)-tail(hc.dissim,-1)
 head(hc.dissim.dif,10)
 
-# now that we have k (we chose k=7 in the lecture), we can construct the clusters
+# now that we have k=7, construct the clusters
 h.clusters <- cutree(hclust.mod, 7)
 h.clusters
 

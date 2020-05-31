@@ -1,9 +1,14 @@
 # Customer Segmentation
+1. Data exploration and preprocessing
+2. K-Means clustering
+3. Hierarchical clustering
+4. Potential targeted marketing based on clusters
+<br/><br/>
 
-## Data exploration and scaling
+## 1. Data exploration and preprocessing
 Data on 3,999 customers obtained from the loyalty program of a former airline.
 
-There are six numerical values describing customers as follow:
+Six numerical values describing customers:
 - **Balance**: Number of miles eligible for award travel
 - **BonusTrans**: Number of non-flight bonus transactions in the past 12 months
 - **BonusMiles**: Number of miles earned from those transactions
@@ -12,10 +17,10 @@ There are six numerical values describing customers as follow:
 - **DaysSinceEnroll**: Tenure in the program (days)
 
 <p align='center'>
-<img src='img/data_str.png/' align='middle' width='450'>
+<img src='img/data_str.png' align='middle' width='500'>
 </p>
 
-### Preprocess data
+### Data preprocessing (scaling)
 - First, 'center' the data by substracting the mean to each column (mean becomes 0 for each column)
 - Then, 'scale' the data by dividing by the standard deviation (standard deviation becomes 1 for each column)
 
@@ -27,7 +32,7 @@ class(pp)
 pp
 pp$mean
 
-#step 2: apply it to our dataset
+#step 2: apply it to the dataset
 airline.scaled <- predict(pp, airline)
 
 # Sanity check
@@ -37,19 +42,24 @@ colMeans(airline.scaled)
 apply(airline.scaled,2,sd)
 ```
 
-|**Raw**|**Scaled**|
-|--|--|
-|<img src='img/al_data.png' width='350'>|<img src='img/al_data_scaled.png' width='350'>|
+|**Raw**|
+|:--|
+|<img src='img/al_data.png' width='400'>|
+
+|**Scaled**|
+|:--|
+|<img src='img/al_data_scaled.png' width='400'>|
 <br/>
 
-## Clustering: K-Means
+## 2. K-Means clustering
 
-k-means has a random start (where the centroids are initially randomly located).
+K-means has a random start (where the centroids are initially randomly located).
 
 ```bash
 # The kmeans function creates the clusters
 # set the number of iterations to k=8
-km <- kmeans(airline.scaled, centers = 8, iter.max=100) # centers randomly selected from rows of airline.scaled
+km <- kmeans(airline.scaled, centers = 8, iter.max=100) 
+# centers randomly selected from rows of airline.scaled
 
 class(km) # class: kmeans
 names(km)
@@ -60,16 +70,18 @@ km.centroids
 # cluster for each point. Store this result.
 km.clusters <- km$cluster
 km.clusters
+
 # the sum of the squared distances of each observation from its cluster centroid => cluster dissimilarity
 km$tot.withinss  # cluster dissimilarity
-# the number of observations in each cluster -- table(km$cluster) also works. Store this resul
+
+# the number of observations in each cluster
 km.size <- km$size
 km.size
 ```
 
 ### Scree plot for k-means
 
-For k means, we literally try many value of k and look at their dissimilarity. Here, test all k from 1 to 100.
+For k-means, try many value of k and look at their dissimilarity; here, let's test all k from 1 to 100.
 
 ```bash
 k.data <- data.frame(k = 1:100)
@@ -79,13 +91,22 @@ k.data$SS <- sapply(k.data$k, function(k) {
 
 # Plot the scree plot.
 plot(k.data$k, k.data$SS, type="l")
+plot(k.data$k, k.data$SS, type="l", xlim=c(0,40))
+axis(side = 1, at = 1:10)
 ```
-<img src='img/km_scree.png' width='350' align='middle'>
 
-<br />
+<img src='img/km_scree.png' width='400' align='middle'>
 
-## Hierarchical Clustering
-Compute all-pair euclidian distances between our observations
+Let's zoom on the smallest k values (1-40) to take a closer look.
+
+To select a "good" k value, pick something that defines the corner / pivot in the L (knee). Here, k=8 seems to be a good pick.
+
+<img src='img/km_scree_enl.png' width='400' align='middle'>
+<br /><br />
+
+## 3. Hierarchical Clustering
+Compute all-pair euclidian distances between the observations.
+
 
 ```bash
 d <- dist(airline.scaled) # method = "euclidean"
@@ -93,17 +114,17 @@ class(d)
 
 # Creates the Hierarchical clustering
 hclust.mod <- hclust(d, method="ward.D2")
+
 # The "method=ward.D2" indicates the criterion to select the pair of clusters to be merged at each iteration
 
 # Now, plot the hierarchy structure (dendrogram)
-# labels=F (false) because we do not want to print text
-# for each of the 3999 observations
+# labels=F (false) to not print text for each of the 3999 observations
 plot(hclust.mod, labels=F, ylab="Dissimilarity", xlab = "", sub = "")
 ```
-<img src='img/hc_dendrogram.png' width='400' align='middle'>
+<img src='img/hc_dendrogram.png' width='450' align='middle'>
 
 ### Scree Plot
-Create the scree plot: dissimilarity for each k
+Create the scree plot: dissimilarity for each k.
 
 ```bash
 hc.dissim <- data.frame(k = seq_along(hclust.mod$height),   # index: 1,2,...,length(hclust.mod$height)
@@ -117,9 +138,11 @@ plot(hc.dissim$k, hc.dissim$dissimilarity, type="l")
 plot(hc.dissim$k, hc.dissim$dissimilarity, type="l", xlim=c(0,40))
 axis(side = 1, at = 1:10)
 ```
-<img src='img/hc_scree.png' width='350' align='middle'>
 
-To select a "good" k value, pick something that defines the corner / pivot in the L (knee).
+<img src='img/hc_scree.png' width='450' align='middle'>
+
+As discussed above, k=7 seems to be a good pick.
+
 ```bash
 # Improvement in dissimilarity for increasing number of clusters
 hc.dissim.dif = head(hc.dissim,-1)-tail(hc.dissim,-1)
@@ -139,3 +162,124 @@ table(h.clusters)
 table(h.clusters, km.clusters)
 ```
 
+<img src='img/km_hc_table.png' width='300' align='middle'>
+
+<br />
+<br />
+
+## Potential targeted marketing options
+
+### K-Means Clusters
+<table>
+  <tr>
+    <td rowspan='2' align='center'> <b> Normalized variables </b></td>
+    <td colspan='8' align='center'><b>Clusters</b></td>
+  </tr>
+  <tr align='center'>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+    <td>5</td>
+    <td>6</td>
+    <td>7</td>
+    <td>8</td>
+  </tr>
+  <tr align='center'>
+    <td>Balance</td>
+    <td>-0.12</td>
+    <td>-0.16</td>
+    <td>0.54</td>
+    <td>0.18</td>
+    <td>-0.42</td>
+    <td>0.95</td>
+    <td>4.89</td>
+    <td>0.95</td>
+  </tr>
+  <tr align='center'>
+    <td>BonusMiles</td>
+    <td>0.08</td>
+    <td>-0.40</td>
+    <td>1.70</td>
+    <td>-0.03</td>
+    <td>-0.61</td>
+    <td>1.11</td>
+    <td>1.47</td>
+    <td>1.21</td>
+  </tr>
+  <tr align='center'>
+    <td>BonusTrans</td>
+    <td>0.56</td>
+    <td>-0.36</td>
+    <td>0.99</td>
+    <td>0.55</td>
+    <td>-0.87</td>
+    <td>2.20</td>
+    <td>0.79</td>
+    <td>3.31</td>
+  </tr>
+  <tr align='center'>
+    <td>FlightMiles</td>
+    <td>-0.24</td>
+    <td>-0.22</td>
+    <td>-0.09</td>
+    <td>1.64</td>
+    <td>-0.25</td>
+    <td>3.85</td>
+    <td>0.48</td>
+    <td>9.84</td>
+  </tr>
+  <tr align='center'>
+    <td>FlightTrans</td>
+    <td>-0.27</td>
+    <td>-0.23</td>
+    <td>-0.08</td>
+    <td>1.69</td>
+    <td>-0.26</td>
+    <td>4.37</td>
+    <td>0.72</td>
+    <td>8.21</td>
+  </tr>
+  <tr align='center'>
+    <td>DaysSinceEnroll</td>
+    <td>-0.58</td>
+    <td>0.95</td>
+    <td>0.66</td>
+    <td>-0.08</td>
+    <td>-0.88</td>
+    <td>0.50</td>
+    <td>1.06</td>
+    <td>-0.33</td>
+  </tr>
+  <tr align='center' bgcolor='grey'>
+    <td>Cluster Size</td>
+    <td>893</td>
+    <td>1,124</td>
+    <td>504</td>
+    <td>212</td>
+    <td>1,107</td>
+    <td>69</td>
+    <td>76</td>
+    <td>14</td>
+  </tr>
+</table>
+
+<br/>
+
+#### Option 1: Dormant customer
+Cluster 2 and 5 are low-acitivity customers. <br/>
+&#8594; Provide promotional one-time events to incentivize new purchases.
+
+#### Option 2: Point chaser
+Customers in Cluster 1 and 3 focus on bonus transactions. <br/>
+&#8594; Provide target bonuses for flying; special offers for bonus transactions
+
+#### Option 3: Old guard
+
+Cluster 6 and 7 are long-lasting customers with moderate spending. <br/>
+&#8594; Provide thank-you gift or speical offers for loyalty.
+
+#### Option 4: New oil
+
+Cluster 4 and 8 are recent customers with very high spending. Should retain these customers. <br/>
+&#8594; Provide bonus miles, perks, etc.

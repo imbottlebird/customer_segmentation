@@ -53,11 +53,14 @@ apply(airline.scaled,2,sd)
 
 ## 2. K-Means clustering
 
-K-means has a random start where the centroids are initially randomly located.
+K-means has a random start where the centroids are initially randomly located. Then iterate the following two steps, until convergence:
+- Assign each observation to the nearest centroid
+- Recalculate centroids as average of assigned observations
+ 
 
 ```bash
 # The kmeans function creates the clusters
-# set the number of iterations to k=8
+# set the number of k=8
 km <- kmeans(airline.scaled, centers = 8, iter.max=100) 
 # centers randomly selected from rows of airline.scaled
 
@@ -105,7 +108,7 @@ To select a "good" k value, pick something that defines the corner / pivot in th
 <br /><br />
 
 ## 3. Hierarchical Clustering
-Compute all-pair euclidian distances between the observations.
+Compute all-pair euclidian distances between the observations. It initially start with as many clusters as data points(here, 3,999). Then, iteratively combine the pair of clusters with the smallest dissimilarity ("close" to each other) until the number of clusters goes down to 1.
 
 
 ```bash
@@ -172,7 +175,7 @@ table(h.clusters, km.clusters)
 ### K-Means Clusters
 <table>
   <tr>
-    <td rowspan='2' align='center'> <b> Normalized variables </b></td>
+    <td rowspan='2' align='center'> <b> Original variables </b></td>
     <td colspan='8' align='center'><b>Clusters</b></td>
   </tr>
   <tr align='center'>
@@ -187,71 +190,71 @@ table(h.clusters, km.clusters)
   </tr>
   <tr align='center'>
     <td>Balance</td>
-    <td>-0.12</td>
-    <td>-0.16</td>
-    <td>0.54</td>
+    <td>61,201</td>
+    <td>57,207</td>
+    <td>127,761</td>
     <td>0.18</td>
-    <td>-0.42</td>
-    <td>0.95</td>
-    <td>4.89</td>
+    <td>31,165</td>
+    <td>61,201</td>
+    <td>127,</td>
     <td>0.95</td>
   </tr>
   <tr align='center'>
     <td>BonusMiles</td>
-    <td>0.08</td>
-    <td>-0.40</td>
-    <td>1.70</td>
+    <td>19,073</td>
+    <td>7,565</td>
+    <td>58,156</td>
     <td>-0.03</td>
-    <td>-0.61</td>
+    <td>2,308</td>
     <td>1.11</td>
     <td>1.47</td>
     <td>1.21</td>
   </tr>
   <tr align='center'>
     <td>BonusTrans</td>
-    <td>0.56</td>
-    <td>-0.36</td>
-    <td>0.99</td>
+    <td>17</td>
+    <td>8</td>
+    <td>21</td>
     <td>0.55</td>
-    <td>-0.87</td>
+    <td>3</td>
     <td>2.20</td>
     <td>0.79</td>
     <td>3.31</td>
   </tr>
   <tr align='center'>
     <td>FlightMiles</td>
-    <td>-0.24</td>
-    <td>-0.22</td>
-    <td>-0.09</td>
+    <td>118</td>
+    <td>147</td>
+    <td>333</td>
     <td>1.64</td>
-    <td>-0.25</td>
+    <td>114</td>
     <td>3.85</td>
     <td>0.48</td>
     <td>9.84</td>
   </tr>
   <tr align='center'>
     <td>FlightTrans</td>
-    <td>-0.27</td>
-    <td>-0.23</td>
-    <td>-0.08</td>
+    <td>0</td>
+    <td>0</td>
+    <td>1</td>
     <td>1.69</td>
-    <td>-0.26</td>
+    <td>0</td>
     <td>4.37</td>
     <td>0.72</td>
     <td>8.21</td>
   </tr>
   <tr align='center'>
     <td>DaysSinceEnroll</td>
-    <td>-0.58</td>
-    <td>0.95</td>
-    <td>0.66</td>
+    <td>2,923</td>
+    <td>6,074</td>
+    <td>5,484</td>
     <td>-0.08</td>
-    <td>-0.88</td>
+    <td>2,300</td>
     <td>0.50</td>
     <td>1.06</td>
     <td>-0.33</td>
   </tr>
-  <tr align='center' bgcolor='grey'>
+  <tr align='center' bgcolor='grey' style="font-weight:bold">
     <td>Cluster Size</td>
     <td>893</td>
     <td>1,124</td>

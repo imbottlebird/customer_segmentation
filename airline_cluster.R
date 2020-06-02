@@ -27,7 +27,8 @@ airline
 # => std becomes 1 for each column
 
 #step 1: create the pre-processor using preProcess
-pp <- preProcess(airline, method=c("center", "scale"))   # normalization for each col: (X_i-mean)/std
+pp <- preProcess(airline, method=c("center", "scale"))   
+# normalization for each col: (X_i-mean)/std
 class(pp)
 pp
 pp$mean
@@ -70,6 +71,19 @@ km$tot.withinss  # cluster dissimilarity: 8289.099
 # the number of observations in each cluster
 km.size <- km$size
 km.size # 893 1124  504  212 1107   69   76   14
+
+km$centers
+# denormalization for each col: 
+# X_i=(x*std)+mean
+
+x_i=(km$centers*
+       
+km_center <- km$centers
+x_i <- (km_center[,1]*sd(km_center[,1]))+mean(km_center[,1])
+
+sd(airline$Balance)
+airline
+
 
 # Scree plot for k-means
 # For k means, we literally try many value of k and look at their dissimilarity.

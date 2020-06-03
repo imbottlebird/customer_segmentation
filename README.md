@@ -108,9 +108,9 @@ To select a "good" k value, pick something that defines the corner / pivot in th
 <br /><br />
 
 ## 3. Hierarchical Clustering
-Hierarchical clustering doens't require us to pre-specify the number of clusters as required by K-means. It also has an advantage over k-means that it visualizes the clustering process into a tree-based representation called a dendrogram.
+Hierarchical clustering doesn't require to pre-specify the number of clusters as required by K-means. It also has an advantage over k-means that it visualizes the clustering process into a tree-based representation called a dendrogram.
 
-Hierarchical clustering computes all-pair euclidian distances between the observations. It initially starts with as many clusters as data points(here, 3,999), then iteratively combine the pair of clusters with the smallest dissimilarity ("close" to each other) until the number of clusters goes down to 1.
+Hierarchical clustering computes all-pair euclidian distances between the observations. It initially starts with as many clusters as data points (here, 3,999), then iteratively combine the pair of clusters with the smallest dissimilarity ("close" to each other) until the number of clusters goes down to 1.
 
 
 ```bash
@@ -188,7 +188,7 @@ fviz_cluster(list(data = airline.scaled, cluster = h.clusters), geom="point", al
 <br />
 <br />
 
-## Potential targeted marketing options
+## Potential target marketing options
 
 ### K-Means Clusters
 <table>

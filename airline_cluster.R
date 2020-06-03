@@ -27,14 +27,11 @@ airline
 # => std becomes 1 for each column
 
 #step 1: create the pre-processor using preProcess
-pp <- preProcess(airline, method=c("center", "scale"))   
-# normalization for each col: (X_i-mean)/std
+pp <- preProcess(airline, method=c("center", "scale"))
+# normalization for each col: (X_i-mean)/std 
 class(pp)
 pp
 pp$mean
-
-
-sd(airline$Balance/sd(airline$Balance))
 
 #step 2: apply it to the dataset
 airline.scaled <- predict(pp, airline)
@@ -59,7 +56,6 @@ set.seed(144)
 # set the number of k=8
 km <- kmeans(airline.scaled, centers = 8, iter.max=100) 
 # centers randomly selected from rows of airline.scaled
-
 class(km) # class: kmeans
 names(km)
 
@@ -69,25 +65,16 @@ km.centroids
 # cluster for each point. Store this result.
 km.clusters <- km$cluster
 km.clusters
+
+km$withinss
+plot(km$cluster, km$tot.withinss)
 # the sum of the squared distances of each observation from its cluster centroid => cluster dissimilarity
 km$tot.withinss  # cluster dissimilarity: 8289.099
 
 # the number of observations in each cluster
 km.size <- km$size
 km.size # 893 1124  504  212 1107   69   76   14
-
 km$centers
-# denormalization for each col: 
-# X_i=(x*std)+mean
-
-x_i=(km$centers*
-       
-km_center <- km$centers
-x_i <- (km_center[,1]*sd(km_center[,1]))+mean(km_center[,1])
-
-sd(airline$Balance)
-airline
-
 
 # Scree plot for k-means
 # For k means, we literally try many value of k and look at their dissimilarity.
@@ -145,5 +132,12 @@ table(h.clusters) # 1242  833  746  723  271   63  121
 # many zeros mean clusters from kmeans and hierarchical "match up"
 table(h.clusters, km.clusters)
 
-###Part 4: Potential Marketing
+# Visualize clustering using fviz_cluster
+# install.packages("factoextra"), if not installed
+library(factoextra)
+# k-mean
+fviz_cluster(km, data=airline.scaled, geom = "point", alpha=0.4)
+# hclust
+fviz_cluster(list(data = airline.scaled, cluster = h.clusters), geom="point", alpha=0.4)
+
 

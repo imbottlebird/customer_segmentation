@@ -82,7 +82,7 @@ km.size <- km$size
 km.size
 ```
 
-### Scree plot for k-means
+### Scree plot
 
 For k-means, try many value of k and look at their dissimilarity; here, let's test all k from 1 to 100.
 
@@ -102,13 +102,15 @@ axis(side = 1, at = 1:10)
 
 Let's zoom on the smallest k values (1-40) to take a closer look.
 
-To select a "good" k value, pick something that defines the corner / pivot in the L (knee). Here, k=8 seems to be a good pick.
+To select a "good" k value, pick something that defines the corner / pivot in the L, where there is a change of slope from steep to shallow (an elbow). Here, k=8 seems to be a good pick.
 
 <img src='img/km_scree_enl.png' width='400' align='middle'>
 <br /><br />
 
 ## 3. Hierarchical Clustering
-Compute all-pair euclidian distances between the observations. It initially start with as many clusters as data points(here, 3,999). Then, iteratively combine the pair of clusters with the smallest dissimilarity ("close" to each other) until the number of clusters goes down to 1.
+Hierarchical clustering doens't require us to pre-specify the number of clusters as required by K-means. It also has an advantage over k-means that it visualizes the clustering process into a tree-based representation called a dendrogram.
+
+Hierarchical clustering computes all-pair euclidian distances between the observations. It initially starts with as many clusters as data points(here, 3,999), then iteratively combine the pair of clusters with the smallest dissimilarity ("close" to each other) until the number of clusters goes down to 1.
 
 
 ```bash
@@ -144,7 +146,7 @@ axis(side = 1, at = 1:10)
 
 <img src='img/hc_scree_enl.png' width='450' align='middle'>
 
-As discussed above, k=7 seems to be a good pick.
+Based on the discussion above, k=7 seems to be a good pick.
 
 ```bash
 # Improvement in dissimilarity for increasing number of clusters
@@ -167,6 +169,22 @@ table(h.clusters, km.clusters)
 
 <img src='img/km_hc_table.png' width='300' align='middle'>
 
+
+### Visualization
+
+We can visualize the clusters using <i> fviz_cluster </i>.
+```bash
+# install.packages("factoextra"), if not installed
+library(factoextra)
+# k-mean
+fviz_cluster(km, data=airline.scaled, geom = "point", alpha=0.4)
+# hclust
+fviz_cluster(list(data = airline.scaled, cluster = h.clusters), geom="point", alpha=0.4)
+```
+
+| K-means (k=8) | Hierarchical clustering (k=7) |
+| :----:  | :----: |
+| <img src="img/plot_k-means.png"> | <img src="img/plot_hclust.png">|
 <br />
 <br />
 
@@ -193,66 +211,66 @@ table(h.clusters, km.clusters)
     <td>61,201</td>
     <td>57,207</td>
     <td>127,761</td>
-    <td>0.18</td>
+    <td>91,719</td>
     <td>31,165</td>
-    <td>61,201</td>
-    <td>127,</td>
-    <td>0.95</td>
+    <td>168,964</td>
+    <td>566,040</td>
+    <td>168,897</td>
   </tr>
   <tr align='center'>
     <td>BonusMiles</td>
     <td>19,073</td>
     <td>7,565</td>
     <td>58,156</td>
-    <td>-0.03</td>
+    <td>16,360</td>
     <td>2,308</td>
-    <td>1.11</td>
-    <td>1.47</td>
-    <td>1.21</td>
+    <td>44,062</td>
+    <td>52,696</td>
+    <td>46,301</td>
   </tr>
   <tr align='center'>
     <td>BonusTrans</td>
     <td>17</td>
     <td>8</td>
     <td>21</td>
-    <td>0.55</td>
+    <td>17</td>
     <td>3</td>
-    <td>2.20</td>
-    <td>0.79</td>
-    <td>3.31</td>
+    <td>33</td>
+    <td>19</td>
+    <td>43</td>
   </tr>
   <tr align='center'>
     <td>FlightMiles</td>
     <td>118</td>
     <td>147</td>
     <td>333</td>
-    <td>1.64</td>
+    <td>2,763</td>
     <td>114</td>
-    <td>3.85</td>
-    <td>0.48</td>
-    <td>9.84</td>
+    <td>5,851</td>
+    <td>1133</td>
+    <td>14,244</td>
   </tr>
   <tr align='center'>
     <td>FlightTrans</td>
     <td>0</td>
     <td>0</td>
     <td>1</td>
-    <td>1.69</td>
+    <td>8</td>
     <td>0</td>
-    <td>4.37</td>
-    <td>0.72</td>
-    <td>8.21</td>
+    <td>18</td>
+    <td>4</td>
+    <td>33</td>
   </tr>
   <tr align='center'>
     <td>DaysSinceEnroll</td>
     <td>2,923</td>
     <td>6,074</td>
     <td>5,484</td>
-    <td>-0.08</td>
+    <td>3,964</td>
     <td>2,300</td>
-    <td>0.50</td>
-    <td>1.06</td>
-    <td>-0.33</td>
+    <td>5,157</td>
+    <td>6,312</td>
+    <td>3,446</td>
   </tr>
   <tr align='center' bgcolor='grey' style="font-weight:bold">
     <td>Cluster Size</td>
@@ -273,7 +291,7 @@ table(h.clusters, km.clusters)
 Cluster 2 and 5 are low-acitivity customers. <br/>
 &#8594; Provide promotional one-time events to incentivize new purchases.
 
-#### Option 2: Point chaser
+#### Option 2: Point seeker
 Customers in Cluster 1 and 3 focus on bonus transactions. <br/>
 &#8594; Provide target bonuses for flying; special offers for bonus transactions
 

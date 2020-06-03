@@ -33,6 +33,9 @@ class(pp)
 pp
 pp$mean
 
+
+sd(airline$Balance/sd(airline$Balance))
+
 #step 2: apply it to the dataset
 airline.scaled <- predict(pp, airline)
 
@@ -40,6 +43,7 @@ airline.scaled <- predict(pp, airline)
 colMeans(airline)
 colMeans(airline.scaled)# mean is (approximately) 0 for all columns
 apply(airline.scaled,2,sd)# standard deviation is 1 for all columns 
+
 # (apply() applies function given as third argument to matrix given as first argument. 
 # 2 means apply sd() to cols. 1 would apply it row-wise, col(1,2) both to row and column.)
 head(airline.scaled)
@@ -52,7 +56,7 @@ head(airline.scaled)
 set.seed(144)
 
 # The kmeans function creates the clusters
-# set the number of iterations to k=8
+# set the number of k=8
 km <- kmeans(airline.scaled, centers = 8, iter.max=100) 
 # centers randomly selected from rows of airline.scaled
 
@@ -140,3 +144,6 @@ table(h.clusters) # 1242  833  746  723  271   63  121
 
 # many zeros mean clusters from kmeans and hierarchical "match up"
 table(h.clusters, km.clusters)
+
+###Part 4: Potential Marketing
+
